@@ -1,0 +1,17 @@
+pip
+setuptools
+torch
+torchvision
+opencv-python
+albumentations
+pydantic
+numpy
+tqdm
+tensorboard
+pyyaml
+matplotlib
+click
+coloredlogs
+scipy
+yaloader
+mllooper

@@ -1,0 +1,11 @@
+!ModuleList
+modules:
+  - !ConsoleLog { }
+
+  - *train_runner
+  - !ModelLoader { }
+  - *eval_runner
+
+  - !TensorBoardLog { }
+  - !TextFileLog { }
+  - !FileLog { }

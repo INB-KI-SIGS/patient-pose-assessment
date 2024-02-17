@@ -1,0 +1,26 @@
+name: patient-pose-assessment
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+dependencies:
+  - python>=3.11
+  - pip
+  - setuptools
+  - pytorch>=2.0
+  - torchvision>=0.12
+  - pytorch-cuda>=12.*
+  - opencv
+  - albumentations
+  - pydantic
+  - numpy
+  - tqdm
+  - tensorboard
+  - pyyaml
+  - matplotlib
+  - click
+  - coloredlogs
+  - scipy
+  - pip:
+    - yaloader
+    - mllooper

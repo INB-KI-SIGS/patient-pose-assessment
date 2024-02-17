@@ -1,0 +1,25 @@
+priority: 1
+---
+- train_runner: &train_runner !Looper
+    name: Trainer
+
+    dataset_loader: *train_dataset_loader
+    model: *model
+    loss: !Loss { metrics: [ !MSELoss { log_level: 20 } ] }
+    trainer: !Trainer { optimizer: !Adam { lr: 1e-3 } }
+    scheduler: !StepLR
+      gamma: 0.1
+      step_test: !LooperAtTotalIterationTest { iterations: [ 190000, 195000, 199000, 199500 ] }
+
+
+    metrics: *train_metrics
+
+    model_logger: !ModelLogger { }
+
+- eval_runner: &eval_runner !Looper
+    name: Evaluator
+
+    dataset_loader: *eval_dataset_loader
+    model: *model
+
+    metrics: *eval_metrics

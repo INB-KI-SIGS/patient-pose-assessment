@@ -1,0 +1,8 @@
+priority: 10
+---
+- model: &model !EfficientNet {}
+---
+- !ConfigVarTrainDatasetTrain { _tag: '!DepthImageDatasetIter', dataset_type: train, train: true }
+- !ConfigVarTrainDatasetTest { _tag: '!DepthImageDataset', dataset_type: test, train: false  }
+- !ConfigVarEvalDatasetTrain { _tag: '!DepthImageDataset', name: Evaluation DepthImageDataset, dataset_type: train, train: false, cache_data: false }
+- !ConfigVarEvalDatasetTest { _tag: '!DepthImageDataset', name: Evaluation DepthImageDataset, dataset_type: test, train: false, cache_data: false }

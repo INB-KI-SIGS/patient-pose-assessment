@@ -1,0 +1,12 @@
+priority: 10
+---
+- model: &model !EfficientNet {}
+---
+
+# Just to enforce a specific camera is set
+- !DepthImageDataset { cameras: [ ] }
+
+- !ConfigVarTrainDatasetTrain { _tag: '!DepthImageDatasetIter' }
+- !ConfigVarTrainDatasetTest { _tag: '!DepthImageDataset' }
+- !ConfigVarEvalDatasetTrain { _tag: '!DepthImageDataset', name: Evaluation DepthImageDataset }
+- !ConfigVarEvalDatasetTest { _tag: '!DepthImageDataset', name: Evaluation DepthImageDataset }

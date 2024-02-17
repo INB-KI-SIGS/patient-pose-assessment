@@ -1,0 +1,8 @@
+priority: 10
+---
+- model: &model !LateFusionNetwork { shared_weights: true }
+---
+- !ConfigVarTrainDatasetTrain { _tag: '!DepthImageCoupleDatasetIter' }
+- !ConfigVarTrainDatasetTest { _tag: '!DepthImageCoupleDataset' }
+- !ConfigVarEvalDatasetTrain { _tag: '!DepthImageCoupleDataset', name: Evaluation DepthImageCoupleDataset }
+- !ConfigVarEvalDatasetTest { _tag: '!DepthImageCoupleDataset', name: Evaluation DepthImageCoupleDataset }

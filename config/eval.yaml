@@ -1,0 +1,9 @@
+!ModuleList
+modules:
+  - !ConsoleLog { }
+
+  - *eval_runner
+
+  - !TensorBoardLog { }
+  - !TextFileLog { }
+  - !FileLog { }

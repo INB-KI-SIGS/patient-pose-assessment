@@ -1,0 +1,99 @@
+priority: 1
+---
+- !Module { log_level: 20, log_time_delta: 00:01:00 }
+- !SeededModule { seed: 999 }
+
+- !TextFileLog { level: 10 }
+- !ConsoleLog { level: 20 }
+- !Metric { log_level: 10 }
+- !Dataset { log_time_delta: 00:30:00, log_level: 10 }
+
+# Save model every 30 minutes and at end
+- !ModelLogger { log_at_teardown: false, log_at_looper_stop: true, log_time_delta: 00:30:00 }
+
+
+### data set and data loading configuration
+- !DataLoaderArgs
+  batch_size: 16
+  num_workers: 4
+  shuffle: false
+  persistent_workers: true
+  pin_memory: true
+
+- !DatasetLoader
+  log_level: 10
+  max_iterations: 200000
+
+- !DepthImageDataset
+  cameras: [cam_left, cam_right]
+  images_per_xray: 5
+  image_size: 336
+  depth_threshold: 1500
+  cache_data: true
+
+- !DepthImageDatasetIter
+  nr_buckets: 9
+
+- train_dataset_loader: &train_dataset_loader !DatasetLoader
+    datasets:
+      train: !ConfigVarTrainDatasetTrain { dataset_type: train, train: true }
+      test: !ConfigVarTrainDatasetTest { dataset_type: test, train: false }
+    next_dataset_tests: [ !DatasetMaxStateTest { iterations_per_type: { train: 440, test: 60 } } ]
+
+
+- eval_dataset_loader: &eval_dataset_loader !DatasetLoader
+    datasets:
+      train: !ConfigVarEvalDatasetTrain { dataset_type: train, train: false, cache_data: false }
+      test: !ConfigVarEvalDatasetTest { dataset_type: test, train: false, cache_data: false }
+    max_epochs: 1
+    max_iterations: null
+    next_dataset_tests: [ !DatasetMaxStateTest { epochs: 1 } ]
+
+
+### model configuration
+- !EfficientNet
+  in_channels: 1
+  dropout: 0.5
+  stochastic_depth_prob: 0.2
+  pretrained: false
+
+  num_classes: 1
+
+  model: b0
+
+- !ScoreFusionNetwork
+  in_channels: 1
+  dropout: 0.5
+  stochastic_depth_prob: 0.2
+  pretrained: false
+
+  branch_dropout: 0.2
+
+- !LateFusionNetwork
+  in_channels: 1
+  dropout: 0.5
+  stochastic_depth_prob: 0.2
+  pretrained: false
+
+  num_classes: 512
+
+  branch_dropout: 0.2
+  outer_dropout: 0.3
+  extra_fusion_features: 256
+
+
+### metrics configuration
+- train_metrics: &train_metrics !ModuleList
+    modules:
+      - !AveragedMetric { metric: !MAELoss { log_level: 20 } }
+      - !AveragedMetric { metric: !CorrectBy { max_distance: 0.5, log_level: 20 } }
+      - !AveragedMetric { metric: !CorrectCutAt { cut_at: 2.5, log_level: 20 } }
+      - !AveragedMetric { metric: !SpearmanCorrelation { log_level: 20 } }
+
+- eval_metrics: &eval_metrics !ModuleList
+    modules:
+      - !MeanMetric { metric: !MSELoss { name: Evaluation MSE, log_level: 20 }, log_time_delta: 00:00:00 }
+      - !MeanMetric { metric: !MAELoss { name: Evaluation MAE, log_level: 20 }, log_time_delta: 00:00:00 }
+      - !MeanMetric { metric: !CorrectBy { max_distance: 0.5, name: Evaluation CorrectBy, log_level: 20 }, log_time_delta: 00:00:00 }
+      - !MeanMetric { metric: !CorrectCutAt { cut_at: 2.5, name: Evaluation CorrectCutAt, log_level: 20 }, log_time_delta: 00:00:00 }
+      - !MeanMetric { metric: !SpearmanCorrelation { name: Evaluation SpearmanCorrelation, log_level: 20 }, log_time_delta: 00:00:00 }
