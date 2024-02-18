@@ -1,4 +1,5 @@
 # Patient Pose Assessment
+This is the source code and the dataset for the paper `Patient Pose Assessment in Radiography using Time-of-Flight Cameras` presented at SPIE Medical Imaging 2024.
 
 ## Usage
 ### Setup
@@ -13,7 +14,7 @@ conda env create -f environment.yaml
 If you don't use conda as a package manager make sure the packages listed in `requirements.txt` are installed in your environment. 
 
 ### Get the Data
-The data described in the paper is uploaded as an attachment to the first release of this repository.
+The data described in the paper is uploaded as an [attachment to the first release](https://github.com/INB-KI-SIGS/patient-pose-assessment/releases/download/v0.0.1/specimen_dataset.zip) of this repository.
 Just download it and unzip the file. In the [Dataset section](#dataset) the structure of the dataset is described.
 
 ### Install as Package
