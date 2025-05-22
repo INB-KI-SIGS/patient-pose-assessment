@@ -1,6 +1,11 @@
 # Patient Pose Assessment
 This is the source code and the dataset for the paper `Patient Pose Assessment in Radiography using Time-of-Flight Cameras` presented at SPIE Medical Imaging 2024.
 
+**Update: May 20, 2025**:
+
+Our synthetic dataset described in the paper `Synthetic Data Generated from CT Scans for Patient Pose Assessment` (to be presented at **MIDL 2025**) is now included in the [latest release](https://github.com/INB-KI-SIGS/patient-pose-assessment/releases/download/v0.0.2/synthetic_dataset.tar.7z).  
+The [Dataset section](#dataset) has been updated so that both datasets are now listed and explained.
+
 ## Usage
 ### Setup
 There are different ways to set up an environment for this package.
@@ -115,8 +120,9 @@ To change the training parameters look in the config files to see what can be ch
 - copy a config file from git, edit it and include a line like `-i path/to/your/own/config.yaml`,
 - or add an inline configuration. For example to update the batch size to 64 add `-y '!DataLoaderArgs { batch_size: 64 }'`
 
-## Dataset
+## Datasets
 
+### Specimen Dataset
 The dataset contains one folder for each foot. These folder names start with the prefix `patient_` 
 followed by a consecutive increasing number and a `l` or `r` delimited by an underscore.
 The `l` or `r` describe if the foot is a left or a right one.
@@ -126,7 +132,18 @@ These flexion folder contain a `data` and in the `data` folder a `dataset` subfo
 
 In the `dataset` folder there are the folders `depth`, `xray` and `label`. 
 
+### Synthetic Dataset
+
+The synthetic dataset follows a similar structure to the specimen dataset, but **flexions are replaced by augmentations**.
+
+Each patient folder of the 10 patients (e.g., `patient_0`, `patient_1`, ...) contains:
+- `depth`
+- `labels`
+
+
+
 ### Depth images
+#### Specimen Dataset
 The `depth` folder contains all the depth images as 16 bit single-channel PNGs,
 where the value of each pixel is a distance in mm. The depth images a named in the format
 `depth_cam_{left,right}_orig_{image_number}_{timestamp}.png`
@@ -135,13 +152,33 @@ where `{image_number}` is the number of the pose for this foot,
 `{left,right}` is the string `left` or `right` depending on the side of the camera.
 Note that the timestamp is an arbitrary number and can not be used for time measuring. 
 
+#### Synthetic Dataset
+Depth images are located at:  
+
+`patient_X/depth/{l,r}/{orig,big,small}/`
+
+Each of these contains depth images for different augmentation levels:
+- `orig`: original point cloud
+- `big`: point cloud where the points have been shifted in a positive direction along the normal 
+- `small`: point cloud where the points have been shifted in a negative direction along the normal 
+
+Files are named using the format:
+
+`depth_cam_{left,right}_{angle}.png`
+- `{angle}` is the rotation angle (ranging from`0.0` to `90.0` in 0.5 steps)
+
+All depth images are 16-bit single-channel PNGs, where pixel values indicate distance in millimeters.
 ### X-ray images
+#### Specimen Dataset
 The `xray` folder contains all X-ray images as 16 bit single-channel PNGs.
 The X-ray images a named in the format
 `xray_{image_number}.png`, where `{image_number}` is the number of the pose for this foot.
 
+#### Synthetic Dataset
+There are no X-ray images in this dataset.
 
 ### Labels
+#### Specimen Dataset
 The `label` folder contains the folder `quailty` and `roi`. In the `quality` folder there is a file `labels.json`,
 which contains all quality labels for this foot.
 Its contents is a mapping of the file names of the X-ray images to a mapping with the keys `label`, `std` and `image_number`.
@@ -158,3 +195,34 @@ For example:
 ```
 
 In the `roi` folder there is a file `roi_depth.json`, which contains ROIs for each depth image.
+
+#### Synthetic Dataset
+Labels are stored in:
+
+`patient_X/labels/{l,r}/`
+
+Each folder contains:
+- `labels.json`: label information (e.g., quality)
+- `roi_depth.json`: region of interest annotations for the depth image
+
+Although the folder and file structure matches the specimen dataset, **the mapping between label entries and depth images is based on pose steps**.
+
+Each label entry uses a step-based format like this:
+```json
+"xray_image_180.png": {
+     "label": 3.0,
+      "std": 0.0,
+      "step": 180 
+}
+```
+To map the step to the corresponding depth image:
+
+Use the formula:
+
+```angle = step / 2```
+
+For example:
+
+    step = 180 → angle = 90.0 → depth_cam_{left,right}_90.0.png
+
+    step = 91 → angle = 45.5 → depth_cam_{left,right}_45.5.png
